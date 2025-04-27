@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 59, 47, 47;
+  --background-rgb: 248, 248, 240;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 248, 248, 240;
+    --background-rgb: 59, 47, 47;
+  }
+}
+
+@layer base {
+  :root {
+    /* Base layer */
+    --background: 60 30% 96%;
+    --foreground: 30 20% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 30 20% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 20% 16%;
+    
+    /* UI elements */
+    --primary: 27 40% 33%;
+    --primary-foreground: 60 30% 96%;
+    --secondary: 20 33% 47%;
+    --secondary-foreground: 60 30% 96%;
+    --muted: 60 10% 96%;
+    --muted-foreground: 30 10% 40%;
+    --accent: 35 70% 62%;
+    --accent-foreground: 30 20% 16%;
+    
+    /* Status colors */
+    --destructive: 0 65% 58%;
+    --destructive-foreground: 60 30% 96%;
+    
+    /* UI components */
+    --border: 30 10% 80%;
+    --input: 30 10% 80%;
+    --ring: 27 40% 33%;
+    
+    /* Chart colors */
+    --chart-1: 27 40% 33%;
+    --chart-2: 20 33% 47%;
+    --chart-3: 35 70% 62%;
+    --chart-4: 18 30% 20%;
+    --chart-5: 30 60% 70%;
+    
+    --radius: 0.5rem;
+  }
+  
+  .dark {
+    --background: 30 20% 16%;
+    --foreground: 60 30% 96%;
+    --card: 30 15% 20%;
+    --card-foreground: 60 30% 96%;
+    --popover: 30 15% 20%;
+    --popover-foreground: 60 30% 96%;
+    
+    /* UI elements */
+    --primary: 27 25% 50%;
+    --primary-foreground: 60 30% 96%;
+    --secondary: 20 25% 45%;
+    --secondary-foreground: 60 30% 96%;
+    --muted: 30 15% 25%;
+    --muted-foreground: 30 10% 70%;
+    --accent: 35 50% 50%;
+    --accent-foreground: 60 30% 96%;
+    
+    /* Status colors */
+    --destructive: 0 50% 45%;
+    --destructive-foreground: 60 30% 96%;
+    
+    /* UI components */
+    --border: 30 15% 30%;
+    --input: 30 15% 30%;
+    --ring: 27 25% 50%;
+    
+    /* Chart colors */
+    --chart-1: 27 35% 60%;
+    --chart-2: 20 35% 55%;
+    --chart-3: 35 60% 55%;
+    --chart-4: 12 25% 40%;
+    --chart-5: 30 45% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium text-coffee-text-primary;
+  }
+}
+
+@layer components {
+  .brew-card {
+    @apply bg-card rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-coffee-brown text-white hover:bg-coffee-brown/90 transition-colors rounded-md px-4 py-2;
+  }
+
+  .btn-secondary {
+    @apply bg-coffee-sienna text-white hover:bg-coffee-sienna/90 transition-colors rounded-md px-4 py-2;
+  }
+
+  .btn-accent {
+    @apply bg-coffee-accent text-coffee-text-primary hover:bg-coffee-accent/90 transition-colors rounded-md px-4 py-2;
+  }
+
+  .section-title {
+    @apply text-xl font-medium text-coffee-text-primary mb-4;
+  }
+
+  .container-brew {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
+  }
+}
