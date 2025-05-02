@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,40 +22,51 @@ const quickLogSchema = z.object({
 
 type QuickLogFormValues = z.infer<typeof quickLogSchema>;
 
-const brewMethods: BrewMethod[] = [
-  "Pour Over",
-  "French Press",
-  "Espresso",
-  "Aeropress",
-  "Cold Brew",
-  "Moka Pot",
-  "Chemex",
-  "V60",
-  "Siphon",
-  "Turkish",
-  "Other",
-];
-
-const coffeeTypes: CoffeeType[] = [
-  "Arabica",
-  "Robusta",
-  "Blend",
-  "Single Origin",
-  "Espresso",
-  "Dark Roast",
-  "Medium Roast",
-  "Light Roast",
-  "Decaf",
-  "Flavored",
-  "Other",
-];
-
-const servingUnits = ["oz", "ml", "cup", "shot"];
+const brewMethods: BrewMethod[] = [];
+const coffeeTypes: CoffeeType[] = [];
+const servingUnits: string[] = [];
 
 export function QuickLogForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const [isFetchingOptions, setIsFetchingOptions] = useState(true);
+  const [options, setOptions] = useState({
+    coffeeTypes: [] as CoffeeType[],
+    brewMethods: [] as BrewMethod[],
+    servingUnits: [] as string[]
+  });
 
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        setIsFetchingOptions(true);
+        const response = await fetch('/api/options');
+        if (!response.ok) {
+          throw new Error('Failed to fetch options');
+        }
+        const data = await response.json();
+        setOptions({
+          coffeeTypes: data.coffeeTypes || [],
+          brewMethods: data.brewMethods || [],
+          servingUnits: data.servingUnits || ['oz', 'ml', 'cup', 'shot']
+        });
+      } catch (error) {
+        console.error('Error fetching options:', error);
+        // Fallback to default options if API fails
+        setOptions({
+          coffeeTypes: [],
+          brewMethods: [],
+          servingUnits: ['oz', 'ml', 'cup', 'shot']
+        });
+      } finally {
+        setIsFetchingOptions(false);
+      }
+    };
+
+    fetchOptions();
+  }, []);
+
+  const { toast } = useToast();
+  const { getToken } = useAuth();
   const form = useForm<QuickLogFormValues>({
     resolver: zodResolver(quickLogSchema),
     defaultValues: {
@@ -69,9 +81,29 @@ export function QuickLogForm() {
     setIsLoading(true);
     
     try {
-      // Simulating API call - would be replaced with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const token = await getToken();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
       
+      console.log('Sending request with token:', token);
+      const response = await fetch('/api/logs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          amount: data.servingSize,
+          type: `${data.coffeeType} (${data.brewMethod})`,
+          notes: ''
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to log coffee');
+      }
+
       // Show success toast
       toast({
         title: "Coffee logged successfully!",
@@ -86,9 +118,17 @@ export function QuickLogForm() {
         servingUnit: "oz",
       });
     } catch (error) {
+      let errorMessage = "Something went wrong. Please try again.";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
       toast({
         title: "Error logging coffee",
-        description: "Something went wrong. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -117,7 +157,7 @@ export function QuickLogForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {coffeeTypes.map((type) => (
+                    {options.coffeeTypes.map((type) => (
                       <SelectItem key={type} value={type}>
                         {type}
                       </SelectItem>
@@ -145,7 +185,7 @@ export function QuickLogForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {brewMethods.map((method) => (
+                    {options.brewMethods.map((method) => (
                       <SelectItem key={method} value={method}>
                         {method}
                       </SelectItem>
@@ -194,7 +234,7 @@ export function QuickLogForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {servingUnits.map((unit) => (
+                    {options.servingUnits.map((unit) => (
                       <SelectItem key={unit} value={unit}>
                         {unit}
                       </SelectItem>
